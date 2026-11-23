@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Share Card</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 40px 16px; color: #555; }
+  </style>
+</head>
+<body>
+  <p id="msg">Opening the chat selector...</p>
+
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script>
+    // Edit only this line
+    const LIFF_ID = "YOUR_LIFF_ID";
+
+    const msg = document.getElementById("msg");
+
+    async function main() {
+      try {
+        await liff.init({ liffId: LIFF_ID });
+
+        if (!liff.isLoggedIn()) {
+          liff.login();
+          return;
+        }
+
+        if (!liff.isApiAvailable("shareTargetPicker")) {
+          msg.textContent = "Please open this link in the LINE app.";
+          return;
+        }
+
+        const res = await fetch("card.json?t=" + Date.now());
+        const card = await res.json();
+
+        const result = await liff.shareTargetPicker([
+          {
+            type: "flex",
+            altText: "TJM Asia Pacific - Contact Card",
+            contents: card
+          }
+        ]);
+
+        msg.textContent = result ? "Card sent successfully." : "Sharing cancelled.";
+        liff.closeWindow();
+      } catch (e) {
+        msg.textContent = "Error: " + e.message;
+      }
+    }
+
+    main();
+  </script>
+</body>
+</html>
